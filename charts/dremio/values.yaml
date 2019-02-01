@@ -3,6 +3,7 @@ image: dremio/dremio-oss
 # the coordinators and the executors.
 # The value of memory should be in MB. CPU is in no of cores.
 coordinator:
+  name: coordinator
   memory: 16384
   cpu: 8
   count: 0
@@ -16,7 +17,12 @@ coordinator:
   # To use custom storage class, uncomment and provide the value here.
   # Otherwise the default storage class configured for your K8S cluster is used.
   #storageClass: managed-premium
+
+master:
+  name: master
+
 executor:
+  name: executor
   memory: 16384
   cpu: 4
   count: 1

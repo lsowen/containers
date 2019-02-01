@@ -1,9 +1,13 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: dremio-client
+  name: {{ template "dremio.coordinator.fullname" . }}
   labels:
-    app: dremio-client
+    app: {{ template "dremio.name" . }}
+    chart: {{ template "dremio.chart" . }}
+    component: "{{ .Values.coordinator.name }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   ports:
   - port: {{ .Values.coordinator.client.port | default 31010 }}
@@ -13,6 +17,8 @@ spec:
     targetPort: 9047
     name: web
   selector:
-    app: dremio-coordinator
+    app: {{ template "dremio.name" . }}
+    component: "{{ .Values.coordinator.name }}"
+    release: {{ .Release.Name }}
   type: {{ .Values.serviceType | default "NodePort" }}
   sessionAffinity: ClientIP

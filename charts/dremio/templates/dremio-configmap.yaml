@@ -1,6 +1,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: dremio-config
+  labels:
+    app: {{ template "dremio.name" . }}
+    chart: {{ template "dremio.chart" . }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+  name: {{ template "dremio.fullname" . }}
 data:
   {{- (.Files.Glob "config/*").AsConfig | nindent 2 }}

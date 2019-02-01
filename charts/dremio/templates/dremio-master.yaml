@@ -1,19 +1,26 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: dremio-master
+  name: {{ template "dremio.master.fullname" . }}
   labels:
-    app: dremio-master
+    app: {{ template "dremio.name" . }}
+    chart: {{ template "dremio.chart" . }}
+    component: "{{ .Values.coordinator.name }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
-  serviceName: "dremio-master"
   replicas: {{.Values.coordinator.master_count}}
   selector:
     matchLabels:
-      app: dremio-coordinator
+      app: {{ template "dremio.name" . }}
+      release: {{ .Release.Name }}
+      component: "{{ .Values.coordinator.name }}"
   template:
     metadata:
       labels:
-        app: dremio-coordinator
+        app: {{ template "dremio.name" . }}
+        component: "{{ .Values.coordinator.name }}"
+        release: {{ .Release.Name }}
       annotations:
         dremio-configmap/checksum: {{ (.Files.Glob "config/*").AsConfig | sha256sum }}
     spec:
@@ -93,7 +100,7 @@ spec:
       volumes:
       - name: dremio-config
         configMap:
-          name: dremio-config
+          name: {{ template "dremio.fullname" . }}
   volumeClaimTemplates:
   - metadata:
       name: dremio-master-volume
