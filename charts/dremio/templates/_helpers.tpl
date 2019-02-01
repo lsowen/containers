@@ -86,6 +86,33 @@ We truncate at 63 chars because some Kubernetes name fields are limited to this 
 {{- end -}}
 {{- end -}}
 
+{{/*
+Create a default fully qualified zookeeper name.
+We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
+*/}}
+{{- define "dremio.zk.fullname" -}}
+{{- $name := default .Chart.Name .Values.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- printf "%s-%s" .Release.Name .Values.zookeeper.name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s-%s" .Release.Name $name .Values.zookeeper.name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Create a zookeeper endpoint.  Allows for "bring your own zookeeper"
+*/}}
+{{- define "dremio.zk.service" -}}
+{{ template "dremio.zk.fullname" . }}
+{{- end -}}
+
+{{/*
+Create a zookeeper endpoint.  Allows for "bring your own zookeeper"
+*/}}
+{{- define "dremio.zk.endpoint" -}}
+{{ template "dremio.zk.service" . }}:{{ .Values.zookeeper.client_port }}
+{{- end -}}
+
 
 {{/*
 Create chart name and version as used by the chart label.

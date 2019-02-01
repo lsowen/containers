@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "dremio.zk.fullname" . }}
+  labels:
+    app: {{ template "dremio.name" . }}
+    chart: {{ template "dremio.chart" . }}
+    component: "{{ .Values.zookeeper.name }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  ports:
+  - port: {{ .Values.zookeeper.client_port }}
+    name: client
+  - port: 2888
+    name: server
+  - port: 3888
+    name: leader-election
+  clusterIP: None
+  selector:
+    app: {{ template "dremio.name" . }}
+    component: "{{ .Values.zookeeper.name }}"
+    release: {{ .Release.Name }}

@@ -53,7 +53,7 @@ spec:
               fieldPath: status.podIP
         - name: DREMIO_JAVA_EXTRA_OPTS
           value: >-
-            -Dzookeeper=zk-hs:2181
+            -Dzookeeper={{ template "dremio.zk.endpoint" . }}
             -Dregistration.publish-host=$(LOCAL_POD_IP)
             -Dservices.coordinator.master.enabled=false
             -Dservices.executor.enabled=false
@@ -71,9 +71,9 @@ spec:
         - containerPort: 45678
           name: server
       initContainers:
-      - name: wait-for-zk
+      - name: wait-for-master
         image: busybox
-        command:  ["sh", "-c", "until nc -z dremio-client {{ .Values.coordinator.web.port | default 9047 }} > /dev/null; do echo waiting for dremio master; sleep 2; done;"]
+        command:  ["sh", "-c", "until nc -z {{ template "dremio.coordinator.fullname" . }} {{ .Values.coordinator.web.port | default 9047 }} > /dev/null; do echo waiting for dremio master; sleep 2; done;"]
       volumes:
       - name: dremio-config
         configMap:

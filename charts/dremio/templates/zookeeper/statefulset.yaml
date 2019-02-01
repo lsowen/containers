@@ -1,53 +1,19 @@
-apiVersion: v1
-kind: Service
-metadata:
-  name: zk-hs
-  labels:
-    app: zk
-spec:
-  ports:
-  - port: 2181
-    name: client
-  - port: 2888
-    name: server
-  - port: 3888
-    name: leader-election
-  clusterIP: None
-  selector:
-    app: zk
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: zk-cs
-  labels:
-    app: zk
-spec:
-  ports:
-  - port: 2181
-    name: client
-  selector:
-    app: zk
----
-apiVersion: policy/v1beta1
-kind: PodDisruptionBudget
-metadata:
-  name: zk-pdb
-spec:
-  selector:
-    matchLabels:
-      app: zk
-  maxUnavailable: 1
----
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: zk
+  name: {{ template "dremio.zk.fullname" . }}
+  labels:
+    app: {{ template "dremio.name" . }}
+    chart: {{ template "dremio.chart" . }}
+    component: "{{ .Values.zookeeper.name }}"
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
 spec:
   selector:
     matchLabels:
-      app: zk
-  serviceName: zk-hs
+      app: {{ template "dremio.name" . }}
+      release: {{ .Release.Name }}
+  serviceName: {{ template "dremio.zk.fullname" . }}
   replicas: 1
   updateStrategy:
     type: RollingUpdate
@@ -55,7 +21,9 @@ spec:
   template:
     metadata:
       labels:
-        app: zk
+        app: {{ template "dremio.name" . }}
+        component: "{{ .Values.zookeeper.name }}"
+        release: {{ .Release.Name }}
     spec:
       affinity:
         podAntiAffinity:
@@ -76,7 +44,7 @@ spec:
             memory: "1Gi"
             cpu: "0.5"
         ports:
-        - containerPort: 2181
+        - containerPort: {{ .Values.zookeeper.client_port }}
           name: client
         - containerPort: 2888
           name: server
@@ -90,7 +58,7 @@ spec:
           --data_dir=/var/lib/zookeeper/data \
           --data_log_dir=/var/lib/zookeeper/data/log \
           --conf_dir=/opt/zookeeper/conf \
-          --client_port=2181 \
+          --client_port={{ .Values.zookeeper.client_port }} \
           --election_port=3888 \
           --server_port=2888 \
           --tick_time=2000 \
@@ -108,7 +76,7 @@ spec:
             command:
             - sh
             - -c
-            - "zookeeper-ready 2181"
+            - "zookeeper-ready {{ .Values.zookeeper.client_port }}"
           initialDelaySeconds: 10
           timeoutSeconds: 5
         livenessProbe:
@@ -116,7 +84,7 @@ spec:
             command:
             - sh
             - -c
-            - "zookeeper-ready 2181"
+            - "zookeeper-ready {{ .Values.zookeeper.client_port }}"
           initialDelaySeconds: 10
           timeoutSeconds: 5
         volumeMounts:

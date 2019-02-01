@@ -53,7 +53,7 @@ spec:
               fieldPath: status.podIP
         - name: DREMIO_JAVA_EXTRA_OPTS
           value: >-
-            -Dzookeeper=zk-hs:2181
+            -Dzookeeper={{ template "dremio.zk.endpoint" . }}
             -Dregistration.publish-host=$(LOCAL_POD_IP)
             -Dservices.coordinator.enabled=false
             {{- if .Values.extraStartParams }}
@@ -68,7 +68,7 @@ spec:
       initContainers:
       - name: wait-for-zk
         image: busybox
-        command:  ["sh", "-c", "until ping -c 1 -W 1 zk-hs > /dev/null; do echo waiting for zookeeper host; sleep 2; done;"]
+        command:  ["sh", "-c", "until ping -c 1 -W 1 {{ template "dremio.zk.service" . }} > /dev/null; do echo waiting for zookeeper host; sleep 2; done;"]
       volumes:
       - name: dremio-config
         configMap:

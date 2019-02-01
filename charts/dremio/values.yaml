@@ -30,3 +30,7 @@ executor:
 # comment out the line below for the helm chart to succeed or add
 # the correct serviceType for your cluster.
 serviceType: LoadBalancer
+
+zookeeper:
+  name: zk
+  client_port: 2181

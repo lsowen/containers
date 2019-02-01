@@ -1,0 +1,10 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ template "dremio.zk.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      app: {{ template "dremio.name" . }}
+      component: "{{ .Values.zookeeper.name }}"
+  maxUnavailable: 1
